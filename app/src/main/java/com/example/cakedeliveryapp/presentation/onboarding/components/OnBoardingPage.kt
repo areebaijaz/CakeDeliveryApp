@@ -82,10 +82,9 @@ fun OnBoardingPage(
 
         )
 
-
+val mod = if(isExpand) Modifier.fillMaxSize() else Modifier.fillMaxWidth()
         Box(
-            modifier = Modifier
-                .fillMaxSize()
+            modifier = mod
                 .background(
                     Brush.verticalGradient(
                         colors = listOf(

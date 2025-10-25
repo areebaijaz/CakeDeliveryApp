@@ -20,17 +20,12 @@ fun CakeButton(
     windowInfo: WindowInfo
 ) {
 
-    val buttonWidth = when(windowInfo.screenWidthInfo){
-        is WindowInfo.WindowType.Compact -> 80.dp
-        is WindowInfo.WindowType.Medium -> 100.dp
-        is WindowInfo.WindowType.Expanded -> 140.dp
+    val expanded = windowInfo.screenWidthInfo is WindowInfo.WindowType.Expanded
 
-    }
 
     Button(
         onClick = onClick,
         shape = RoundedCornerShape(6.dp),
-        modifier = Modifier.width(buttonWidth)
     ) {
         Text(
             text = text,
