@@ -1,18 +1,17 @@
 package com.example.cakedeliveryapp.data
 
 import com.example.cakedeliveryapp.data.local.entity.CakeEntity
-import com.example.cakedeliveryapp.data.model.CakeResponseItem
+import com.example.cakedeliveryapp.data.model.CakeDto
 import com.example.cakedeliveryapp.domain.model.Cake
 
 // Retrofit response to Domain Model
-fun CakeResponseItem.toDomain() : Cake{
+fun CakeDto.toDomain(id : String) : Cake{
     return Cake(
-        id = id,
-        name = name,
-        description = description,
-        imageUrl = imageUrl,
-        price = price,
-        quantity = quantity
+        id = id ?: "",
+        name = name ?: "",
+        description = description ?: "",
+        imageUrl = imageUrl ?: "",
+        price = price ?: 0,
     )
 }
 
@@ -24,7 +23,7 @@ fun Cake.toEntity() : CakeEntity {
         description = description,
         imageUrl = imageUrl,
         price = price,
-        quantity = quantity
+
     )
 }
 
@@ -36,7 +35,7 @@ fun CakeEntity.toDomain() : Cake {
         description = description,
         imageUrl = imageUrl,
         price = price,
-        quantity = quantity
+
     )
 
 }

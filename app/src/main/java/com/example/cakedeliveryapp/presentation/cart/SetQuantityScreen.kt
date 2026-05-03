@@ -1,6 +1,5 @@
-package com.example.cakedeliveryapp.presentation.common
+package com.example.cakedeliveryapp.presentation.cart
 
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -29,6 +28,10 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -40,12 +43,13 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import com.example.cakedeliveryapp.data.local.cart.entity.CartEntity
 import com.example.cakedeliveryapp.presentation.Dimens.cardImageInCart
-import com.example.cakedeliveryapp.presentation.Dimens.imageInDetail
 import com.example.cakedeliveryapp.presentation.Dimens.paddingInDetail
 import com.example.cakedeliveryapp.presentation.Dimens.smallPadding
 import com.example.cakedeliveryapp.presentation.Dimens.spaceInDetail
 import com.example.cakedeliveryapp.presentation.WindowInfo
+import com.example.cakedeliveryapp.presentation.common.CartAndCheckoutViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -53,18 +57,19 @@ fun AddToCartScreen(
     navController: NavController,
     cartViewModel: CartAndCheckoutViewModel = hiltViewModel(),
     onClick: (String) -> Unit,
-    windowInfo : WindowInfo
+    windowInfo : WindowInfo,
 ) {
     val compact = windowInfo.screenWidthInfo is WindowInfo.WindowType.Compact
     val medium = windowInfo.screenWidthInfo is WindowInfo.WindowType.Medium
     val expanded = windowInfo.screenWidthInfo is WindowInfo.WindowType.Expanded
 
     val cake = cartViewModel.cake.collectAsState()
+    var quantity by remember { mutableStateOf(1) }
     val context = LocalContext.current
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = "Your Cart",style = MaterialTheme.typography.titleMedium.copy(fontSize = if(expanded) 30.sp else 24.sp),
+                title = { Text(text = "Select Quantity",style = MaterialTheme.typography.titleMedium.copy(fontSize = if(expanded) 30.sp else 24.sp),
                     modifier = Modifier.padding(start = 5.dp)) },
                 navigationIcon =
                     {
@@ -100,13 +105,25 @@ fun AddToCartScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    val total = (cake.value?.price ?: 0) * (cake.value?.quantity ?: 0)
+                    val total = (cake.value?.price )?.times((quantity ))
                     Text(
-                        "Total: ₨ $total",
+                        "Total: Rs $total",
                         style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
                     )
                     Button(
                         onClick = {
+                            val cartItem = cake.value?.let {
+                                CartEntity(
+                                    id = it.id,
+                                    name = it.name,
+                                    imageUrl = it.imageUrl,
+                                    price = it.price,
+                                    quantity = quantity
+                                )
+                            }
+                            if (cartItem != null) {
+                                cartViewModel.addCartItem(cartItem)
+                            }
                             onClick(cake.value?.id ?: "")
                         }
                     ) {
@@ -177,10 +194,8 @@ fun AddToCartScreen(
             ) {
                 Button(
                     onClick = {
-                        val newQty = (cake.value?.quantity?.minus(1))?.coerceAtLeast(1)
-                        if (newQty != null) {
-                            cartViewModel.updateWithCakeId(newQty)
-                        }
+                        quantity = (quantity - 1).coerceAtLeast(1)
+
                     },
                     modifier = Modifier.width(buttonWidth)
                 ) {
@@ -191,16 +206,14 @@ fun AddToCartScreen(
 
                 }
                 Text(
-                    text = cake.value?.quantity.toString(),
+                    text = quantity.toString(),
                     modifier = Modifier.padding(horizontal = 16.dp),
                     style = MaterialTheme.typography.bodyLarge,
                 )
                 Button(
                     onClick = {
-                        val newQty = (cake.value?.quantity?.inc())
-                        if (newQty != null) {
-                            cartViewModel.updateWithCakeId(newQty)
-                        }
+                        quantity = (quantity + 1)
+
                     },
                     modifier = Modifier.width(buttonWidth)
                 ) {
@@ -222,13 +235,25 @@ fun AddToCartScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    val total = (cake.value?.price ?: 0) * (cake.value?.quantity ?: 0)
+                    val total = (cake.value?.price ?: 0) * (quantity)
                     Text(
                         "Total: ₨ $total",
                         style = MaterialTheme.typography.bodyLarge.copy(fontSize = 24.sp),
                     )
                     Button(
                         onClick = {
+                            val cartItem = cake.value?.let {
+                                CartEntity(
+                                    id = it.id,
+                                    name = it.name,
+                                    imageUrl = it.imageUrl,
+                                    price = it.price,
+                                    quantity = quantity
+                                )
+                            }
+                            if (cartItem != null) {
+                                cartViewModel.addCartItem(cartItem)
+                            }
                             onClick(cake.value?.id ?: "")
                         }
                     ) {
